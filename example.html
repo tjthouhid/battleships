@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <title>AJAX Example</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="custom.css">
+
+  </head>
+
+  <body style="background-image: url(assets/wave.jpeg); align-items: center;">
+    <div class="jumbotron jumbotron-fluid" style="background-color: #c83200">
+      <div class="container" style="position: center; color: white; text-align: center;">
+        <h1 class="display-8">Battleships</h1>
+        <p class="lead">Simon Storey - B00746082</p>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="board" class="grid">
+      </div>
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+      <script src="https://kit.fontawesome.com/c24a339e99.js"></script>
+      
+      <script>
+        var size = 8;
+        var turns = 5;
+        $(document).ready(function()
+        {
+          buildBoard(size,"");
+
+          var data = {
+            gridsize: size,
+            turns: turns,
+          };
+
+          $("body").on("click",".cell", function()
+          {
+            id = this.id;
+            var data = {id: this.id};
+            attack(JSON.stringify(data));
+          });
+
+          initBoard(JSON.stringify(data));
+        });
+
+        function initBoard(data)
+        {
+          $.ajax(
+          {
+            type: "POST",
+            dataType: "json",
+            data: "gridsize=" + data,
+            cache: false,
+            url: "initBoard.php",
+            success: function(jsonObj)
+            {
+              //buildBoard(size,jsonObj.game.board); // uncomment this line if u want too show ship in ui
+              console.dir(jsonObj);
+            }
+          });
+        }
+
+        function attack(data)
+        {
+          $.ajax(
+          {
+            type: "POST",
+            dataType: "json",
+            data: "data=" + data,
+            cache: false,
+            url: "attack.php",
+            success: function(jsonObj)
+            {
+              if(jsonObj.status == "end"){
+                alert(jsonObj.message);
+              }else{
+                 alert(jsonObj.message);
+              }
+              console.dir(jsonObj);
+            }
+          });
+        }
+      
+        function buildBoard(size,board)
+        {
+          //console.log(board)
+          $("#board").empty();
+          var width = (56*size)+(10*(size-1));
+          console.log(width);
+
+          for (let x = 0; x < size; x++)
+          {
+            var row = "<div class='row' style='width:" + width + "px;' >";
+            for (let y = 0; y < size; y++)
+            {
+              if(board.length>0 && board[x][y]!="#"){
+                row = row + "<div class='cell' id='" + x + "-" + y + "'><span class='blank'>"+board[x][y]+"</span></div>";
+              }else{
+                row = row + "<div class='cell' id='" + x + "-" + y + "'><span class='blank'><i class='fas fa-square'></i></span></div>";
+              }
+              
+            }
+            row = row + "</div>";
+            $("#board").append(row);
+          }
+        }
+      
+      </script>
+      <!-- <script src="initBoard.php"></script> -->
+      <!-- <script src="attack.php"></script> -->
+    </div>
+  </body>
+</html>
